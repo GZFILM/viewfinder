@@ -53,7 +53,7 @@ body.graded #cam{opacity:0}
 #hud .meta{font-family:var(--mono);font-size:12px;color:#d6d5cf;direction:ltr}
 #hud .sep{width:1px;height:14px;background:rgba(255,255,255,.3)}
 
-#warn{position:fixed;z-index:6;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 46px);
+#warn{position:fixed;z-index:6;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 46px);font-size:12.5px!important;
   background:rgba(40,18,8,.9);border:1px solid var(--warn);color:#ffd9c9;font-size:13px;padding:6px 12px;border-radius:6px;max-width:min(92vw,520px);text-align:center}
 
 /* Dock */
@@ -67,6 +67,10 @@ body.graded #cam{opacity:0}
 .ctl b.acc{color:var(--accent)}
 .ctl svg{width:22px;height:22px;stroke:var(--fg);fill:none;stroke-width:1.6}
 .ctl:active,.ctl.open{background:rgba(255,255,255,.08)}
+.lensbtn{flex:0 0 58px;width:58px;height:58px;border:2px solid var(--accent);border-radius:12px;color:var(--accent);font-family:var(--mono);font-size:11px;gap:0}
+.lensbtn b{font-size:20px;color:var(--accent);letter-spacing:0}
+.lensbtn.open{background:rgba(242,179,61,.15)}
+#bFormat span{font-size:11px;color:var(--dim)}
 #shoot{flex:0 0 60px;width:60px;height:60px;min-width:60px;min-height:60px;padding:0;margin:0;box-sizing:border-box;aspect-ratio:1;
   border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;background:transparent}
 #shoot span{display:block;flex:none;width:46px;height:46px;border-radius:50%;background:#e8322f;transition:transform .1s}
@@ -113,6 +117,7 @@ body.graded #cam{opacity:0}
   .row{flex-direction:column;justify-content:space-between;flex:1;gap:0}
   .ctl{height:auto;flex:1 1 0;width:100%;max-height:52px}
   #shoot{flex:0 0 60px}
+  .lensbtn{flex:0 0 56px;width:58px;height:56px;max-height:none}
   #hud{right:76px}
   #quick{left:auto;right:76px;top:0;bottom:0;width:min(330px,48vw);max-height:none;border-top:0;border-left:1px solid var(--line);
     padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
@@ -194,14 +199,13 @@ select{width:100%;background:#0f1014;color:var(--fg);border:1px solid var(--line
 
 <footer id="dock">
   <div class="row">
-    <button class="ctl" id="bLens" aria-label="החלף עדשה"><b class="acc" id="bLensV">35mm</b>עדשה</button>
     <button class="ctl" id="bGuides" aria-label="החלף קומפוזיציה">
       <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M9 5v14M15 5v14M3 9.7h18M3 14.3h18"/></svg>קומפוזיציה</button>
     <button class="ctl" id="bLook" aria-label="פילטר קולנועי"><b id="bLookV">—</b>פילטר</button>
+    <button class="ctl lensbtn" id="bLens" aria-label="החלף עדשה"><b id="bLensV">35</b>mm</button>
     <button id="shoot" aria-label="צלם פריים"><span></span></button>
     <button class="ctl" id="bAlbum" aria-label="אלבום"><i class="thumb" id="albThumb"></i>אלבום</button>
-    <button class="ctl" id="bSensor" aria-label="החלף חיישן"><b id="bSensorV">S35</b>חיישן</button>
-    <button class="ctl" id="bAspect" aria-label="החלף יחס מסך"><b id="bAspectV">16:9</b>יחס</button>
+    <button class="ctl" id="bFormat" aria-label="חיישן ויחס מסך"><b id="bSensorV">S35</b><span id="bAspectV" class="num">16:9</span></button>
     <button class="ctl" id="bMenu" aria-label="הגדרות">
       <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>הגדרות</button>
   </div>
@@ -289,7 +293,7 @@ const PHONE_LONG = 34.6; // long side (mm) of a 4:3 frame whose diagonal equals 
 const SENSORS = {
   ff:     {label:'Full Frame',        short:'FF',     w:36,   hint:'Full Frame: חיישן 36×24 מ״מ, כמו FX3, A7S III או FX6. העדשה מתנהגת כפי שכתוב עליה.'},
   s35:    {label:'FX30 · Super 35',   short:'S35',    w:23.3, hint:'FX30: חיישן Super 35 (APS-C) ברוחב 23.3 מ״מ. קרופ של בערך 1.5×, כלומר 35 מ״מ על ה-FX30 נראה כמו 53 מ״מ על Full Frame.'},
-  s35hfr: {label:'FX30 · 4K 120p',    short:'S35·120',w:21.2, hint:'FX30 ב-4K 100/120p: קרופ נוסף של בערך 1.1× מעל ה-Super 35, כך שהפריים צר עוד קצת.'},
+  s35hfr: {label:'FX30 · 4K 120p',    short:'S35·120', btn:'120p', w:21.2, hint:'FX30 ב-4K 100/120p: קרופ נוסף של בערך 1.1× מעל ה-Super 35, כך שהפריים צר עוד קצת.'},
 };
 const ASPECTS = [
   {id:'16:9', r:16/9,   label:'16:9'},
@@ -566,10 +570,14 @@ function draw(){
   const warn = $('#warn');
   if(over && stream){
     const portrait = innerHeight > innerWidth;
+    const hasWide = devices.some(d=>/ultra|wide|0[.,]5/i.test(d.label));
     warn.textContent = portrait
-      ? 'הפריים רחב ממה שהטלפון רואה. סובב את הטלפון לרוחב, או בחר את העדשה הרחבה (0.5×) בהגדרות.'
-      : 'העדשה הזו רחבה מעדשת הטלפון, אז קצוות הפריים חסרים. בחר את העדשה הרחבה (0.5×) בהגדרות.';
+      ? 'הפריים רחב ממה שהטלפון רואה. סובב את הטלפון לרוחב.'
+      : hasWide ? 'העדשה רחבה מעדשת הטלפון. השוליים השחורים הם מה שחסר. אפשר לבחור עדשה רחבה (0.5×) בהגדרות.'
+                : 'הטלפון לא רואה רחב כמו העדשה הזו. השוליים השחורים הם מה שחסר, אבל המסגרת מדויקת.';
     warn.hidden = false;
+    warn.style.top = Math.max(region.y+4, fy+fh-warn.offsetHeight-10) + 'px';
+    warn.style.left = g.cx + 'px';
   } else warn.hidden = true;
 }
 function loop(){ draw(); requestAnimationFrame(loop); }
@@ -584,7 +592,7 @@ function updateUI(){
   $('#hEq').textContent = S.sensor==='ff' ? 'Full Frame' : '≈ ' + Math.round(eqFF()) + 'mm FF';
   $('#hAspect').textContent = aspectObj().label;
   $('#hFov').textContent = 'H ' + hfov().toFixed(0) + '°';
-  $('#bSensorV').textContent = sn.short;
+  $('#bSensorV').textContent = sn.btn || sn.short;
   $('#bAspectV').textContent = aspectObj().label.replace(' DCI','').replace(':1','');
   $('#bLensV').textContent = S.lens;
   const lk = lookObj();
@@ -633,9 +641,7 @@ function buildUI(){
   $('#eqPlus').onclick=()=>setEq(phoneEq()+.5);
   $('#camSelect').onchange=e=>startCam(e.target.value);
 
-  const sensorOrder = Object.keys(SENSORS);
-  $('#bSensor').onclick=()=>{S.sensor=sensorOrder[(sensorOrder.indexOf(S.sensor)+1)%sensorOrder.length];updateUI();toast(SENSORS[S.sensor].label)};
-  $('#bAspect').onclick=()=>{const i=ASPECTS.findIndex(a=>a.id===S.aspect);S.aspect=ASPECTS[(i+1)%ASPECTS.length].id;updateUI()};
+  $('#bFormat').onclick=()=>toggleQuick('format');
   $('#bMenu').onclick=()=>{closeQuick();openSheet();};
   $('#bGuides').onclick=()=>toggleQuick('guides');
   $('#closeSheet').onclick=closeSheet; $('#scrim').onclick=closeSheet;
@@ -645,7 +651,7 @@ function buildUI(){
 let quickKind = null;
 function toggleQuick(kind){ if(quickKind===kind && !$('#quick').hidden) closeQuick(); else { quickKind=kind; renderQuick(kind); $('#quick').hidden=false; markOpen(); relayoutQuick(); } }
 function closeQuick(){ $('#quick').hidden=true; quickKind=null; markOpen(); }
-function markOpen(){ for(const [id,k] of [['#bLens','lens'],['#bGuides','guides'],['#bLook','look']]) $(id).classList.toggle('open', quickKind===k); }
+function markOpen(){ for(const [id,k] of [['#bLens','lens'],['#bGuides','guides'],['#bLook','look'],['#bFormat','format']]) $(id).classList.toggle('open', quickKind===k); }
 function relayoutQuick(){
   const q=$('#quick'), d=$('#dock').getBoundingClientRect();
   if(d.width < innerWidth*0.6){ q.style.bottom=''; } else { q.style.bottom = (innerHeight - d.top) + 'px'; }
@@ -669,6 +675,15 @@ function renderQuick(kind){
       <p class="qnote">כדי לשלב כמה קומפוזיציות יחד: הגדרות ← קומפוזיציות.</p>`;
     q.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ const v=b.dataset.g; S.guides = v?[v]:[]; if(v) S.lastGuide=v; updateUI(); });
     $('#qFlip').onclick=()=>{S.flip=(S.flip+1)%4;updateUI()};
+  } else if(kind==='format'){
+    q.innerHTML = `<h3><span>חיישן</span></h3>
+      <div class="qlist">${Object.entries(SENSORS).map(([k,v])=>`<button data-s="${k}" class="${k===S.sensor?'on':''}">${v.label}<small>${v.w} mm</small></button>`).join('')}</div>
+      <h3 style="margin-top:14px"><span>יחס מסך</span></h3>
+      <div class="qgrid">${ASPECTS.map(a=>`<button data-a="${a.id}" class="${a.id===S.aspect?'on':''}" style="font-size:13px">${a.label.replace(' DCI','')}</button>`).join('')}</div>
+      <div class="qrow" style="direction:rtl"><label class="switch" style="flex:1"><span>השוואה ל${S.sensor==='ff'?'-FX30':'-Full Frame'}</span><input type="checkbox" id="qCmp" ${S.compare?'checked':''}></label></div>`;
+    q.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{S.sensor=b.dataset.s; updateUI();});
+    q.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{S.aspect=b.dataset.a; updateUI();});
+    $('#qCmp').onchange=e=>{S.compare=e.target.checked; updateUI();};
   } else if(kind==='look'){
     const lk = lookObj();
     q.innerHTML = `<h3><span>פילטר קולנועי</span></h3>
@@ -869,6 +884,19 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 buildUI(); updateUI();
 const relayout = ()=>{ measureRegion(); lastVid=''; if(!$('#quick').hidden) relayoutQuick(); };
 addEventListener('resize', ()=>setTimeout(relayout,60));
+// Some Android phones keep a portrait-shaped stream after rotating to landscape (a narrow, cropped picture).
+// When the stream's shape no longer matches the screen, restart the camera.
+let camFixT;
+function checkStreamShape(){
+  clearTimeout(camFixT);
+  camFixT = setTimeout(()=>{
+    if(!stream || !video.videoWidth || $('#start').hidden===false) return;
+    const screenLand = innerWidth > innerHeight, streamLand = video.videoWidth > video.videoHeight;
+    if(screenLand !== streamLand) startCam(S.deviceId).catch(()=>{});
+  }, 700);
+}
+addEventListener('resize', checkStreamShape);
+video.addEventListener('resize', ()=>{ lastVid=''; });
 if(screen.orientation) screen.orientation.addEventListener('change', ()=>setTimeout(relayout,120));
 relayout(); loop();
 if(document.fonts) document.fonts.ready.then(relayout);
