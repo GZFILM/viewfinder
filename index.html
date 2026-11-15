@@ -158,6 +158,26 @@ select{width:100%;background:#0f1014;color:var(--fg);border:1px solid var(--line
 .info p{margin:6px 0 0;font-size:13px;line-height:1.6;color:#cfcec8}
 .info p b{color:var(--accent);font-weight:500}
 
+/* calibration */
+.calib{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.calib h4{margin:8px 0 0;font-size:14px;color:var(--accent);font-weight:500}
+.csteps{margin:0;padding-inline-start:20px;font-size:13px;line-height:1.6;color:#cfcec8;display:flex;flex-direction:column;gap:4px}
+.csteps b{color:var(--fg);font-weight:500}
+.cbtn{padding:10px 14px;border-radius:8px;border:1px solid var(--line);font-size:14px;background:rgba(255,255,255,.04)}
+.cbtn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.cbtn:disabled{opacity:.4}
+.cform{display:flex;flex-direction:column;gap:8px}
+.cform label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
+.cform span{display:flex;align-items:center;gap:6px;color:var(--dim);font-size:13px}
+.cform input,.cform select{width:110px;background:#0f1014;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit;font-family:var(--mono);font-size:15px;direction:ltr;text-align:center}
+.cres{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px;border:1px dashed var(--line);border-radius:8px}
+.cres span{font-size:14px}
+.cres b{font-family:var(--mono);color:var(--accent);font-size:17px}
+#calbar{position:fixed;z-index:15;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:min(92vw,520px);
+  background:var(--panel-solid);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+#calbar p{margin:0;font-size:13px;line-height:1.5;flex:1}
+body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
+
 /* Start */
 #start{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#1a1b21,#08090b 70%);padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
 .card{max-width:420px;text-align:center}
@@ -196,6 +216,10 @@ select{width:100%;background:#0f1014;color:var(--fg);border:1px solid var(--line
   <span class="chip" id="hLook" hidden></span>
 </header>
 <div id="warn" hidden></div>
+<div id="calbar" hidden>
+  <p>מצב כיול: זה כל מה שהטלפון רואה. סמן על הקיר את הקצה הימני והשמאלי של התמונה.</p>
+  <button class="cbtn pri" id="calDone">סיימתי לסמן</button>
+</div>
 
 <footer id="dock">
   <div class="row">
@@ -254,7 +278,35 @@ select{width:100%;background:#0f1014;color:var(--fg);border:1px solid var(--line
     <select id="camSelect" aria-label="בחר מצלמת טלפון"></select>
     <div class="chips" id="eqChips" style="margin-top:8px"></div>
     <div class="stepper"><button id="eqMinus" aria-label="פחות">−</button><output id="eqOut">24mm</output><button id="eqPlus" aria-label="יותר">+</button></div>
-    <p class="hint">המספר הוא אורך המוקד &quot;השווה ל-Full Frame&quot; של העדשה בטלפון. ברוב האייפונים החדשים העדשה הראשית היא 24 מ״מ, הרחבה (0.5×) היא 13 מ״מ. לכיול מדויק: צלם משהו עם ה-FX30 בעדשה ידועה, עמוד באותה נקודה ושנה את המספר עד שהמסגרת כאן תואמת.</p>
+    <p class="hint">המספר הוא אורך המוקד של עדשת הטלפון, בשפה של Full Frame. כל המסגרות באפליקציה מחושבות ממנו, ולכן כדאי לכייל אותו פעם אחת לכל טלפון.</p>
+
+    <div class="calib">
+      <h4>שיטה 1: מטר וקיר (בלי ה-FX30)</h4>
+      <ol class="csteps">
+        <li>עמוד ישר מול קיר, בדיוק <b>מטר אחד</b> ממנו. המטר נמדד מהקיר עד הטלפון.</li>
+        <li>החזק את הטלפון <b>לרוחב</b> ולחץ על הכפתור למטה. האפליקציה תראה את כל מה שמצלמת הטלפון רואה.</li>
+        <li>סמן על הקיר (מדבקה או עיפרון) איפה נגמרת התמונה בצד <b>ימין</b> ואיפה בצד <b>שמאל</b>.</li>
+        <li>מדוד את המרחק בין שני הסימונים, והקלד אותו כאן.</li>
+      </ol>
+      <button class="cbtn" id="calView">הצג את התמונה המלאה של הטלפון</button>
+      <div class="cform">
+        <label>מרחק מהקיר <span><input type="number" id="calD" inputmode="decimal" min="20" max="1000" value="100"> ס״מ</span></label>
+        <label>רוחב בין הסימונים <span><input type="number" id="calW" inputmode="decimal" min="10" max="5000" placeholder="133"> ס״מ</span></label>
+      </div>
+      <div class="cres"><span id="calRes1">הקלד את הרוחב שמדדת</span><button class="cbtn pri" id="calApply1" disabled>השתמש במספר הזה</button></div>
+
+      <h4>שיטה 2: מול ה-FX30 (הכי מדויק)</h4>
+      <ol class="csteps">
+        <li>שים את המצלמה והטלפון זה ליד זה, באותה נקודה ומכוונים לאותו מקום.</li>
+        <li>במצלמה, נסה עדשות או זום עד שהמצלמה רואה <b>בדיוק</b> את אותו רוחב כמו מצלמת הטלפון.</li>
+        <li>הקלד את העדשה ואת מצב החיישן.</li>
+      </ol>
+      <div class="cform">
+        <label>עדשה במצלמה <span><input type="number" id="calL" inputmode="decimal" min="5" max="400" placeholder="18"> מ״מ</span></label>
+        <label>חיישן <span><select id="calS"></select></span></label>
+      </div>
+      <div class="cres"><span id="calRes2">הקלד את העדשה</span><button class="cbtn pri" id="calApply2" disabled>השתמש במספר הזה</button></div>
+    </div>
   </section>
 
   <section class="grp">
@@ -485,7 +537,10 @@ function geo(){
   if(S.compare){ const c = frameMM(otherSensor()); cmp = {tw:c.w/(2*L), th:c.h/(2*L)}; }
   const R = document.body.classList.contains('clean') ? {x:0,y:0,w:innerWidth,h:innerHeight} : region;
   // the main frame always fills the available screen; a larger comparison frame may run off the edges
-  const s = Math.min(R.w*.97/(2*fTw), R.h*.97/(2*fTh));
+  const s = calView
+    ? Math.min(innerWidth/(2*vTw), innerHeight/(2*vTh))       // calibration: the whole phone image fills the screen
+    : Math.min(R.w*.97/(2*fTw), R.h*.97/(2*fTh));
+  if(calView) return {vw,vh,vTw,vTh,fTw,fTh,cmp:null,s,cx:innerWidth/2,cy:innerHeight/2,f};
   return {vw,vh,vTw,vTh,fTw,fTh,cmp,s,cx:R.x+R.w/2,cy:R.y+R.h/2,f};
 }
 
@@ -524,6 +579,7 @@ function draw(){
   glDraw();
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
+  if(calView){ drawCalib(g); return; }
   const fw = 2*g.fTw*g.s, fh = 2*g.fTh*g.s, fx = g.cx-fw/2, fy = g.cy-fh/2;
 
   // mask outside frame
@@ -703,7 +759,7 @@ function renderQuick(kind){
 // tap on the picture closes a quick picker
 document.addEventListener('pointerdown', e=>{ if(!$('#quick').hidden && !e.target.closest('#quick,#dock')) closeQuick(); }, true);
 
-function setEq(v){ v=Math.max(8,Math.min(200,Math.round(v*2)/2)); if(curDevice) S.phoneEq[curDevice]=v; else S.phoneEq['_']=v; updateUI(); }
+function setEq(v){ v=Math.max(8,Math.min(200,Math.round(v*10)/10)); if(curDevice) S.phoneEq[curDevice]=v; else S.phoneEq['_']=v; updateUI(); }
 function openSheet(anchor){ $('#sheet').hidden=false; $('#scrim').hidden=false; if(anchor) $(anchor).scrollIntoView({block:'start'}); else $('#sheet').scrollTop=0; }
 function closeSheet(){ $('#sheet').hidden=true; $('#scrim').hidden=true; }
 let toastT; function toast(t){ const el=$('#toast'); el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1600); }
@@ -891,6 +947,58 @@ $('#bkFile').onchange = async e=>{
     toast(`שוחזר: הגדרות ו-${n} תמונות`);
   }catch(err){ toast('זה לא קובץ גיבוי של Viewfinder'); }
 };
+
+// ---------- calibration ----------
+// Method 1: at distance D the phone sees a wall strip W wide  ->  f = PHONE_LONG * D / W
+// Method 2: lens L on a sensor of width Sw sees the same width as the phone  ->  f = L * PHONE_LONG / Sw
+let calView = false;
+function drawCalib(g){
+  const W = innerWidth, H = innerHeight;
+  const vw = 2*g.vTw*g.s, vh = 2*g.vTh*g.s, x = g.cx-vw/2, y = g.cy-vh/2;
+  ctx.strokeStyle = '#f2b33d'; ctx.lineWidth = 4; ctx.strokeRect(x+2, y+2, vw-4, vh-4);
+  ctx.fillStyle = '#f2b33d';
+  const ay = g.cy, a = 18;
+  for(const [ex,dir] of [[x+6,1],[x+vw-6,-1]]){            // arrows pointing at the left and right edges
+    ctx.beginPath(); ctx.moveTo(ex,ay); ctx.lineTo(ex+dir*a,ay-a*.7); ctx.lineTo(ex+dir*a,ay+a*.7); ctx.closePath(); ctx.fill();
+  }
+  ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(g.cx-14,g.cy); ctx.lineTo(g.cx+14,g.cy); ctx.moveTo(g.cx,g.cy-14); ctx.lineTo(g.cx,g.cy+14); ctx.stroke();
+  if(H > W){
+    ctx.font='600 15px Heebo, sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#fff';
+    ctx.fillText('סובב את הטלפון לרוחב', g.cx, y + 40);
+  }
+}
+function setCalView(on){
+  calView = on; document.body.classList.toggle('calib', on);
+  $('#calbar').hidden = !on; lastVid='';
+  if(on){ closeSheet(); closeQuick(); } else { relayout(); openSheet('#calD'); }
+}
+$('#calView').onclick = ()=>setCalView(true);
+$('#calDone').onclick = ()=>setCalView(false);
+
+function calResult(el, btn, f){
+  if(f && isFinite(f) && f>=8 && f<=200){
+    el.innerHTML = `עדשת הטלפון: <b>${f.toFixed(1)} מ״מ</b>`; btn.disabled=false; btn.dataset.f = f; return;
+  }
+  btn.disabled = true;
+  if(f) el.textContent = 'המספר לא נראה הגיוני. בדוק את המדידה.';
+}
+function calc1(){
+  const D = +$('#calD').value, Wd = +$('#calW').value;
+  if(!D || !Wd){ $('#calRes1').textContent='הקלד את הרוחב שמדדת'; $('#calApply1').disabled=true; return; }
+  calResult($('#calRes1'), $('#calApply1'), PHONE_LONG*D/Wd);
+}
+function calc2(){
+  const L = +$('#calL').value, sw = (SENSORS[$('#calS').value]||SENSORS.s35).w;
+  if(!L){ $('#calRes2').textContent='הקלד את העדשה'; $('#calApply2').disabled=true; return; }
+  calResult($('#calRes2'), $('#calApply2'), L*PHONE_LONG/sw);
+}
+$('#calS').innerHTML = Object.entries(SENSORS).map(([k,v])=>`<option value="${k}">${v.short}</option>`).join('');
+$('#calS').value = 's35';
+for(const id of ['#calD','#calW']) $(id).addEventListener('input', calc1);
+for(const id of ['#calL','#calS']) $(id).addEventListener('input', calc2);
+$('#calS').addEventListener('change', calc2);
+for(const id of ['#calApply1','#calApply2']) $(id).onclick = e=>{ setEq(+e.currentTarget.dataset.f); toast('הכיול נשמר: '+phoneEq()+' מ״מ'); };
 
 // ---------- gestures: pinch = focal length, double tap = clean monitor ----------
 const pts = new Map(); let pinch=null, tapT=0, downPos=null;
