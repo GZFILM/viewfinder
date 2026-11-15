@@ -256,6 +256,13 @@ select{width:100%;background:#0f1014;color:var(--fg);border:1px solid var(--line
     <div class="stepper"><button id="eqMinus" aria-label="פחות">−</button><output id="eqOut">24mm</output><button id="eqPlus" aria-label="יותר">+</button></div>
     <p class="hint">המספר הוא אורך המוקד &quot;השווה ל-Full Frame&quot; של העדשה בטלפון. ברוב האייפונים החדשים העדשה הראשית היא 24 מ״מ, הרחבה (0.5×) היא 13 מ״מ. לכיול מדויק: צלם משהו עם ה-FX30 בעדשה ידועה, עמוד באותה נקודה ושנה את המספר עד שהמסגרת כאן תואמת.</p>
   </section>
+
+  <section class="grp">
+    <h3>גיבוי והעברה לטלפון חדש</h3>
+    <div class="chips"><button id="bkSave">שמור קובץ גיבוי</button><button id="bkLoad">שחזר מגיבוי</button></div>
+    <input type="file" id="bkFile" accept=".json,application/json" hidden>
+    <p class="hint">הקובץ כולל את כל ההגדרות, הכיול ואת התמונות באלבום. שמור אותו ב-Google Drive, ובטלפון החדש פתח את האפליקציה ובחר ״שחזר מגיבוי״.</p>
+  </section>
 </aside>
 
 <div id="start">
@@ -855,6 +862,35 @@ $('#vDel').onclick=async()=>{
   await albumDel(viewing.id).catch(()=>{}); closeViewer(); openAlbum(); updateThumb(); toast('נמחק מהאלבום');
 };
 updateThumb();
+
+// ---------- backup / restore (one JSON file: settings + calibration + album) ----------
+const blobToDataURL = b => new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(r.error); r.readAsDataURL(b); });
+async function dataURLToBlob(u){ return (await fetch(u)).blob(); }
+$('#bkSave').onclick = async ()=>{
+  try{
+    toast('מכין גיבוי…');
+    const settings = Object.assign({}, S, {phoneEq:Object.assign({}, S.phoneEq, {_:phoneEq()}), deviceId:''});
+    const shots = [];
+    for(const r of await albumAll().catch(()=>[])) shots.push({id:r.id, name:r.name, meta:r.meta, data:await blobToDataURL(r.blob)});
+    const json = JSON.stringify({app:'viewfinder', version:1, saved:new Date().toISOString(), settings, shots});
+    downloadFile(new File([json], `viewfinder-backup-${new Date().toISOString().slice(0,10)}.json`, {type:'application/json'}));
+    toast(`הגיבוי נשמר (${shots.length} תמונות). העבר אותו ל-Google Drive.`);
+  }catch(e){ toast('לא הצלחתי ליצור גיבוי'); }
+};
+$('#bkLoad').onclick = ()=>$('#bkFile').click();
+$('#bkFile').onchange = async e=>{
+  const f = e.target.files && e.target.files[0]; e.target.value=''; if(!f) return;
+  try{
+    const j = JSON.parse(await f.text());
+    if(j.app!=='viewfinder' || !j.settings) throw new Error('not a backup');
+    S = Object.assign({}, DEF, j.settings, {deviceId:S.deviceId});
+    if(curDevice && j.settings.phoneEq && j.settings.phoneEq._ && !S.phoneEq[curDevice]) S.phoneEq[curDevice] = j.settings.phoneEq._;
+    let n=0;
+    for(const s of (j.shots||[])){ await albumAdd({id:s.id, name:s.name, meta:s.meta, blob:await dataURLToBlob(s.data)}); n++; }
+    updateUI(); updateThumb(); lastVid='';
+    toast(`שוחזר: הגדרות ו-${n} תמונות`);
+  }catch(err){ toast('זה לא קובץ גיבוי של Viewfinder'); }
+};
 
 // ---------- gestures: pinch = focal length, double tap = clean monitor ----------
 const pts = new Map(); let pinch=null, tapT=0, downPos=null;
