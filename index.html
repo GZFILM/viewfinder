@@ -451,10 +451,19 @@ const LOOKS = [
    text:'שחור-לבן קונטרסטי עם גרעין של פילם, כמו בפילם נואר של שנות ה-40 וב״רומא״ של קוארון. כלי עבודה של צלמים: בלי צבע רואים מיד אם יש הפרדה באור.'},
   {id:'super8',he:'סופר 8', short:'S8', en:'Super 8 Film', n:4,
    text:'סרט ביתי משנות ה-70: צבע חם ודהוי, גרעין גס, שריטות ואבק שקופצים מפריים לפריים, הבהוב של אור ורעד קטן של הפילם במצלמה. מתאים לפלאשבקים, זיכרונות וקליפים. הכי טוב יחד עם חיישן Super 8.'},
+  {id:'drama', he:'דרמה', short:'DRAMA', en:'Drama', n:5,
+   text:'צבע רך ומאופק, צללים עמוקים אבל לא שחורים לגמרי, וגוון עור חם. הלוק של דרמות כמו ״יורשים״ ו״מנצ׳סטר ליד הים״: הצבע לא צועק, והרגש נשאר אצל השחקנים.'},
+  {id:'commercial', he:'פרסומת', short:'AD', en:'Commercial', n:6,
+   text:'בהיר, נקי ורווי: לבנים נקיים, צבעים חיים ועור זוהר. הלוק של פרסומות לאוכל, לאופנה ולמוצרים, ושל קליפים. הכל נראה חדש, מזמין ויקר.'},
+  {id:'horror', he:'אימה', short:'HORROR', en:'Horror', n:7,
+   text:'קר, ירקרק ודהוי, עם שחורים עמוקים ושוליים כהים שמסתירים את מה שמחכה בפינות. הלוק של ״לזמן את הרוע״ ושל ״המסור״, שידוע בגוון הירוק החולני שלו. מתאים למתח, ללילה ולמרתפים.'},
 ];
 // ---------- versions (shown in the home screen and in "what's new") ----------
-const APP_VER = '2.0';
+const APP_VER = '2.1';
 const RELEASES = [
+  {v:'2.1', date:'16.11.2026', items:[
+    '3 פילטרים חדשים לפי ז׳אנר: דרמה, פרסומת ואימה.',
+    'שורת זכויות יוצרים במסך הבית.']},
   {v:'2.0', date:'16.11.2026', items:[
     'שם חדש לאפליקציה: View&Finder.',
     'מסך בית עם תפריט: אלבום, הגדרות, מה חדש ושיתוף.',
@@ -569,7 +578,7 @@ void main(){
   } else if(look<3.5){
     float y=mix(l,smoothstep(.05,.95,l),.7); y=mix(y,y*y*(3.-2.*y),.35)*.96;
     y+=(hash(floor(uv*vec2(1280.,720.)))-.5)*.08; c=vec3(y);
-  } else {
+  } else if(look<4.5){
     // Super 8: 18 fps gate weave, warm faded stock, flicker, coarse grain, scratches and dust
     float fr=floor(time*18.);
     vec2 u=uv+(vec2(rnd(vec2(fr,1.)),rnd(vec2(fr,2.)))-.5)*vec2(.004,.006);
@@ -587,8 +596,23 @@ void main(){
     vec2 g=floor(uv*vec2(48.,36.)); vec2 f=fract(uv*vec2(48.,36.))-.5;
     float dust=step(.994,rnd(g+fr*1.37))*(1.-smoothstep(.06,.22,length(f*vec2(1.,1.+rnd(g)))));
     c=mix(c,vec3(.04,.03,.02),dust*.85);
+  } else if(look<5.5){
+    // Drama: muted colour, soft contrast, lifted blacks, cool-green shadows, warm skin and highlights
+    c=sat(c,.7);
+    c+=vec3(-.03,.012,.025)*(1.-smoothstep(0.,.5,l)) + vec3(.07,.03,-.03)*smoothstep(.35,.9,l);
+    c=mix(c,c*c*(3.-2.*c),.45); c=mix(vec3(.04,.04,.045),c,.94)*.93;
+  } else if(look<6.5){
+    // Commercial: bright, clean, punchy colour; whites kept neutral
+    c=pow(c,vec3(.88))*1.04; c=sat(c,1.28);
+    c=mix(c,c*c*(3.-2.*c),.35); c+=vec3(.0,.005,.015)*smoothstep(.6,1.,l);
+  } else {
+    // Horror: cold sickly green, drained colour, crushed blacks, dark and grainy
+    c=sat(c,.45); c*=vec3(.88,1.02,.92);
+    c+=vec3(-.02,.03,.02)*(1.-smoothstep(0.,.6,l));
+    c=clamp((c-.08)*1.22,0.,1.); c=pow(c,vec3(1.15))*.9;
+    c+=(hash(floor(uv*vec2(960.,540.)))-.5)*.05;
   }
-  vec2 d=uv-.5; c*=1.-dot(d,d)*(look>3.5?1.5:look>2.5?1.0:.55);
+  vec2 d=uv-.5; c*=1.-dot(d,d)*(look>6.5?2.2:look>5.5?.2:look>4.5?.9:look>3.5?1.5:look>2.5?1.0:.55);
   gl_FragColor=vec4(clamp(c,0.,1.),1.);
 }`;
 function initGL(){
