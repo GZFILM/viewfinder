@@ -191,6 +191,11 @@ select{width:100%;background:#0f1014;color:var(--fg);border:1px solid var(--line
   background:var(--panel-solid);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px}
 #calbar p{margin:0;font-size:13px;line-height:1.5;flex:1}
 body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
+#gbar{position:fixed;z-index:15;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 8px);width:min(92vw,560px);
+  background:var(--panel-solid);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px}
+#gbar p{margin:0;font-size:12.5px;line-height:1.5;flex:1}
+body.gedit #dock,body.gedit #bFlip,body.gedit #warn,body.gedit #hud{display:none!important}
+#stage,#dock,#hud,#gbar,#toast,#quick{-webkit-user-select:none;user-select:none}
 
 /* Start */
 #start{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#1a1b21,#08090b 70%);padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
@@ -267,6 +272,10 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
   <span class="chip" id="hLook" hidden></span>
 </header>
 <div id="warn" hidden></div>
+<div id="gbar" hidden>
+  <p>גרור באמצע כדי להזיז. משוך פינה או צד כדי למתוח. צביטה משנה גודל.</p>
+  <button class="cbtn" id="gReset">אפס</button><button class="cbtn pri" id="gDone">סיום</button>
+</div>
 <div id="calbar" hidden>
   <p>מצב כיול: זה כל מה שהטלפון רואה. סמן על הקיר את הקצה הימני והשמאלי של התמונה.</p>
   <button class="cbtn pri" id="calDone">סיימתי לסמן</button>
@@ -444,7 +453,7 @@ const ASPECTS = [
 const PRIMES = [10,12,14,16,18,20,24,28,35,40,50,65,85,100,135];
 const MASKS = [{v:0,label:'בלי הכהיה'},{v:.55,label:'הכהיה בינונית'},{v:.88,label:'כמעט שחור'}];
 const COLORS = [{v:'#ffffff',label:'לבן'},{v:'#f2b33d',label:'ענבר'},{v:'#6fe3ff',label:'תכלת'},{v:'#ff5b7a',label:'ורוד'}];
-const LOOKS = [
+const LOOKS = [ // keep Super 8 and Commercial at the end of the list
   {id:'none',  he:'ללא פילטר', short:'—', n:0, text:'התמונה הנקייה מהמצלמה.'},
   {id:'teal',  he:'בלוקבסטר', short:'TEAL', en:'Teal & Orange', n:1,
    text:'הלוק של סרטי הקיץ ההוליוודיים, כמו הסרטים של מייקל ביי ו״מקס הזועם: כביש הזעם״. צללים כחלחלים וגווני עור חמים, כך שהדמויות קופצות מהרקע.'},
@@ -452,20 +461,23 @@ const LOOKS = [
    text:'תהליך מעבדה שבו מדלגים על שלב ההלבנה של הפילם: צבע דהוי וניגודיות קשה. ״להציל את טוראי ריאן״ ו״שבעה חטאים״ הם הדוגמאות המוכרות. מתאים למלחמה, מתח ועולם אפור.'},
   {id:'noir',  he:'נואר', short:'NOIR', en:'Noir B&W', n:3,
    text:'שחור-לבן קונטרסטי עם גרעין של פילם, כמו בפילם נואר של שנות ה-40 וב״רומא״ של קוארון. כלי עבודה של צלמים: בלי צבע רואים מיד אם יש הפרדה באור.'},
-  {id:'super8',he:'סופר 8', short:'S8', en:'Super 8 Film', n:4,
-   text:'סרט ביתי משנות ה-70: צבע חם ודהוי, גרעין גס, שריטות ואבק שקופצים מפריים לפריים, הבהוב של אור ורעד קטן של הפילם במצלמה. מתאים לפלאשבקים, זיכרונות וקליפים. הכי טוב יחד עם חיישן Super 8.'},
   {id:'drama', he:'דרמה', short:'DRAMA', en:'Drama', n:5,
    text:'צבע רך ומאופק, צללים עמוקים אבל לא שחורים לגמרי, וגוון עור חם. הלוק של דרמות כמו ״יורשים״ ו״מנצ׳סטר ליד הים״: הצבע לא צועק, והרגש נשאר אצל השחקנים.'},
-  {id:'commercial', he:'פרסומת', short:'AD', en:'Commercial', n:6,
-   text:'בהיר, נקי ורווי: לבנים נקיים, צבעים חיים ועור זוהר. הלוק של פרסומות לאוכל, לאופנה ולמוצרים, ושל קליפים. הכל נראה חדש, מזמין ויקר.'},
   {id:'horror', he:'אימה', short:'HORROR', en:'Horror', n:7,
    text:'קר, ירקרק ודהוי, עם שחורים עמוקים ושוליים כהים שמסתירים את מה שמחכה בפינות. הלוק של ״לזמן את הרוע״ ושל ״המסור״, שידוע בגוון הירוק החולני שלו. מתאים למתח, ללילה ולמרתפים.'},
   {id:'horror70', he:'אימה שנות ה-70', short:'70s', en:'70s Horror · Carpenter', n:8,
    text:'הלוק של ג׳ון קרפנטר ב״ליל המכשפות״ (1978) וב״הערפל״: לילה כחול עמוק, אור כתום חם של פנסי רחוב וחלונות, שחורים עמוקים, גרעין של פילם וזוהר קטן סביב מקורות אור. מתאים לרחוב בלילה, לפרברים שקטים ולצללית שמחכה בקצה הפריים.'},
+  {id:'super8',he:'סופר 8', short:'S8', en:'Super 8 Film', n:4,
+   text:'סרט ביתי משנות ה-70: צבע חם ודהוי, גרעין גס, שריטות ואבק שקופצים מפריים לפריים, הבהוב של אור ורעד קטן של הפילם במצלמה. מתאים לפלאשבקים, זיכרונות וקליפים. הכי טוב יחד עם חיישן Super 8.'},
+  {id:'commercial', he:'פרסומת', short:'AD', en:'Commercial', n:6,
+   text:'בהיר, נקי ורווי: לבנים נקיים, צבעים חיים ועור זוהר. הלוק של פרסומות לאוכל, לאופנה ולמוצרים, ושל קליפים. הכל נראה חדש, מזמין ויקר.'},
 ];
 // ---------- versions (shown in the home screen and in "what's new") ----------
-const APP_VER = '2.2';
+const APP_VER = '2.3';
 const RELEASES = [
+  {v:'2.3', date:'16.11.2026', items:[
+    'הזזה ומתיחה ביד של קווי הקומפוזיציה, כמו קרופ: גוררים, מושכים פינות וצדדים, או צובטים.',
+    'סדר חדש לפילטרים: סופר 8 ופרסומת תמיד בסוף.']},
   {v:'2.2', date:'16.11.2026', items:[
     'בדיקת עדכונים: כשיש גרסה חדשה, מופיע במסך הבית כפתור ״עדכן עכשיו״.',
     'פילטר אימה של שנות ה-70 בסגנון ג׳ון קרפנטר.',
@@ -558,7 +570,7 @@ const GUIDES = [
 
 // ---------- state ----------
 const DEF = {sensor:'s35', lens:35, aspect:'16:9', guides:['thirds'], compare:false, mask:.55, color:'#ffffff',
-  flip:0, level:false, capGuides:true, phoneEq:{}, deviceId:'', lastGuide:'thirds', look:'none', backId:'', seenVer:'', v:2};
+  flip:0, level:false, capGuides:true, phoneEq:{}, deviceId:'', lastGuide:'thirds', look:'none', backId:'', seenVer:'', gr:{x:0,y:0,w:1,h:1}, v:2};
 let S = Object.assign({}, DEF);
 try{ const j = JSON.parse(localStorage.getItem('vf-state')||'null'); if(j) S = Object.assign({}, DEF, j); }catch(e){}
 if(!(S.v>=2)){ S.compare = false; S.v = 2; } // v2: the main frame fills the screen; comparison is opt-in
@@ -719,6 +731,10 @@ function measureRegion(){
 }
 
 // ---------- drawing ----------
+// the guides can be moved and stretched by hand inside the frame; S.gr is that area as a fraction of the frame
+const grOK = () => S.gr && S.gr.w>0 && S.gr.h>0;
+const grIsFull = () => !grOK() || (S.gr.x===0 && S.gr.y===0 && S.gr.w===1 && S.gr.h===1);
+function guideRect(fx,fy,fw,fh){ const r = grOK() ? S.gr : {x:0,y:0,w:1,h:1}; return [fx+r.x*fw, fy+r.y*fh, r.w*fw, r.h*fh]; }
 function guidePath(x,y,w,h){
   const p = new Path2D();
   for(const id of S.guides){ const g = GUIDES.find(g=>g.id===id); if(g) g.draw(p,x,y,w,h,S.flip); }
@@ -768,7 +784,8 @@ function draw(){
     } else ctx.fillText(lab, g.cx-cw/2+6, g.cy-ch/2-16);
   }
   // guides
-  if(S.guides.length) strokeGuides(ctx, guidePath(fx,fy,fw,fh), fx,fy,fw,fh, 1.2);
+  if(S.guides.length){ const [gx,gy,gw,gh] = guideRect(fx,fy,fw,fh); strokeGuides(ctx, guidePath(gx,gy,gw,gh), gx,gy,gw,gh, 1.2); }
+  if(gEdit){ const [gx,gy,gw,gh] = guideRect(fx,fy,fw,fh); lastFrame={fx,fy,fw,fh}; drawGuideHandles(gx,gy,gw,gh); }
   // frame lines + corners
   ctx.strokeStyle='#fff'; ctx.lineWidth=1.2; ctx.strokeRect(fx+.5,fy+.5,fw-1,fh-1);
   const k = Math.min(22, fw*.08, fh*.08); ctx.lineWidth=3;
@@ -910,9 +927,12 @@ function renderQuick(kind){
     q.innerHTML = `<h3><span>קומפוזיציה</span><button id="qFlip" style="color:var(--accent);font-size:12px">↻ סובב ספירלה</button></h3>
       <div class="qlist"><button data-g="" class="${S.guides.length?'':'on'}">ללא קווים</button>${GUIDES.map(g=>`<button data-g="${g.id}" class="${S.guides.includes(g.id)?'on':''}">${g.he}<small>${g.en}</small></button>`).join('')}</div>
       ${S.guides.length?`<p class="qnote"><b style="color:var(--fg)">${gi.he}:</b> ${gi.text.replace(/<[^>]+>/g,'')}</p>`:''}
+      ${S.guides.length?`<div class="qrow" style="direction:rtl"><button id="qGEdit" style="flex:1;border-color:var(--accent);color:var(--accent)">✥ הזז ומתח את הקווים ביד</button>${grIsFull()?'':'<button id="qGReset">אפס</button>'}</div>`:''}
       <p class="qnote">כדי לשלב כמה קומפוזיציות יחד: הגדרות ← קומפוזיציות.</p>`;
     q.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ const v=b.dataset.g; S.guides = v?[v]:[]; if(v) S.lastGuide=v; updateUI(); });
     $('#qFlip').onclick=()=>{S.flip=(S.flip+1)%4;updateUI()};
+    if($('#qGEdit')) $('#qGEdit').onclick=()=>setGEdit(true);
+    if($('#qGReset')) $('#qGReset').onclick=()=>{ S.gr={x:0,y:0,w:1,h:1}; updateUI(); toast('הקווים חזרו לכל הפריים'); };
   } else if(kind==='format'){
     q.innerHTML = `<h3><span>חיישן</span></h3>
       <div class="qlist">${Object.entries(SENSORS).map(([k,v])=>`<button data-s="${k}" class="${k===S.sensor?'on':''}">${v.label}<small>${v.w} mm</small></button>`).join('')}</div>
@@ -1026,7 +1046,7 @@ function capture(){
   if(facing==='user'){ x.save(); x.translate(ow,0); x.scale(-1,1); }   // save the selfie exactly as it was seen (mirrored)
   x.drawImage(src, cx0,cy0,cx1-cx0,cy1-cy0, (cx0-sx)*mx,(cy0-sy)*my,(cx1-cx0)*mx,(cy1-cy0)*my);
   if(facing==='user') x.restore();
-  if(S.capGuides && S.guides.length) strokeGuides(x, guidePath(0,0,ow,oh), 0,0,ow,oh, Math.max(2,ow/900));
+  if(S.capGuides && S.guides.length){ const [gx,gy,gw,gh] = guideRect(0,0,ow,oh); strokeGuides(x, guidePath(gx,gy,gw,gh), gx,gy,gw,gh, Math.max(2,ow/900)); }
   x.fillStyle='#0c0d10'; x.fillRect(0,oh,ow,bar);
   x.fillStyle='#ecebe6'; x.font=`600 ${Math.round(bar*.42)}px "JetBrains Mono", monospace`; x.textBaseline='middle'; x.textAlign='left';
   const sn = SENSORS[S.sensor];
@@ -1247,18 +1267,66 @@ for(const id of ['#calL','#calS']) $(id).addEventListener('input', calc2);
 $('#calS').addEventListener('change', calc2);
 for(const id of ['#calApply1','#calApply2']) $(id).onclick = e=>{ setEq(+e.currentTarget.dataset.f); toast('הכיול נשמר: '+phoneEq()+' מ״מ'); };
 
+// ---------- manual guide area (edit mode) ----------
+let gEdit=false, lastFrame=null, gDrag=null;
+function drawGuideHandles(x,y,w,h){
+  ctx.save(); ctx.setLineDash([6,5]); ctx.strokeStyle='#f2b33d'; ctx.lineWidth=1.5; ctx.strokeRect(x,y,w,h); ctx.setLineDash([]);
+  ctx.fillStyle='#f2b33d'; ctx.strokeStyle='#000'; ctx.lineWidth=1.5;
+  for(const [hx,hy] of [[x,y],[x+w,y],[x,y+h],[x+w,y+h]]){ ctx.beginPath(); ctx.arc(hx,hy,9,0,7); ctx.fill(); ctx.stroke(); }
+  for(const [hx,hy,ww,hh] of [[x+w/2,y,26,7],[x+w/2,y+h,26,7],[x,y+h/2,7,26],[x+w,y+h/2,7,26]]){ ctx.fillRect(hx-ww/2,hy-hh/2,ww,hh); ctx.strokeRect(hx-ww/2,hy-hh/2,ww,hh); }
+  ctx.restore();
+}
+function setGEdit(on){
+  gEdit=on; document.body.classList.toggle('gedit', on); $('#gbar').hidden=!on; closeQuick(); closeSheet();
+  if(on && !S.guides.length){ S.guides=[S.lastGuide||'thirds']; }
+  if(on){ document.body.classList.remove('clean'); toast('גרור ומתח את הקווים'); }
+  updateUI();
+}
+$('#gDone').onclick=()=>setGEdit(false);
+$('#gReset').onclick=()=>{ S.gr={x:0,y:0,w:1,h:1}; updateUI(); };
+const MIN_G=.12, clamp01=(v,a,b)=>Math.max(a,Math.min(b,v));
+function gDown(e){
+  if(!lastFrame) return;
+  const {fx,fy,fw,fh}=lastFrame, r=Object.assign({},S.gr), px=e.clientX, py=e.clientY;
+  if(pts.size===2){ const [a,b]=[...pts.values()]; gDrag={mode:'pinch', d:Math.hypot(a.x-b.x,a.y-b.y), r}; return; }
+  const x=fx+r.x*fw, y=fy+r.y*fh, w=r.w*fw, h=r.h*fh, T=30;
+  const nl=Math.abs(px-x)<T, nr=Math.abs(px-(x+w))<T, nt=Math.abs(py-y)<T, nb=Math.abs(py-(y+h))<T;
+  const inX=px>x-T&&px<x+w+T, inY=py>y-T&&py<y+h+T;
+  let edges={l:nl&&inY, r:nr&&inY&&!nl, t:nt&&inX, b:nb&&inX&&!nt};
+  const mode = (edges.l||edges.r||edges.t||edges.b) ? 'resize' : (px>x&&px<x+w&&py>y&&py<y+h ? 'move' : null);
+  gDrag = mode ? {mode, edges, px, py, r} : null;
+}
+function gMove(e){
+  if(!gDrag || !lastFrame) return;
+  const {fw,fh}=lastFrame, r0=gDrag.r;
+  if(gDrag.mode==='pinch'){
+    if(pts.size<2) return; const [a,b]=[...pts.values()]; const k=Math.hypot(a.x-b.x,a.y-b.y)/Math.max(10,gDrag.d);
+    const cx=r0.x+r0.w/2, cy=r0.y+r0.h/2; let w=clamp01(r0.w*k,MIN_G,1), h=clamp01(r0.h*k,MIN_G,1);
+    S.gr={x:clamp01(cx-w/2,0,1-w), y:clamp01(cy-h/2,0,1-h), w, h}; save(); return;
+  }
+  const dx=(e.clientX-gDrag.px)/fw, dy=(e.clientY-gDrag.py)/fh;
+  if(gDrag.mode==='move'){ S.gr={x:clamp01(r0.x+dx,0,1-r0.w), y:clamp01(r0.y+dy,0,1-r0.h), w:r0.w, h:r0.h}; save(); return; }
+  let L=r0.x, T=r0.y, R=r0.x+r0.w, B=r0.y+r0.h; const E=gDrag.edges;
+  if(E.l) L=clamp01(L+dx,0,R-MIN_G); if(E.r) R=clamp01(R+dx,L+MIN_G,1);
+  if(E.t) T=clamp01(T+dy,0,B-MIN_G); if(E.b) B=clamp01(B+dy,T+MIN_G,1);
+  S.gr={x:L,y:T,w:R-L,h:B-T}; save();
+}
+
 // ---------- gestures: pinch = focal length, double tap = clean monitor ----------
 const pts = new Map(); let pinch=null, tapT=0, downPos=null;
 ov.addEventListener('pointerdown', e=>{
+  if(gEdit){ pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); gDown(e); return; }
   pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); downPos={x:e.clientX,y:e.clientY,t:Date.now()};
   if(pts.size===2){ const [a,b]=[...pts.values()]; pinch={d:Math.hypot(a.x-b.x,a.y-b.y), lens:S.lens}; }
 });
 ov.addEventListener('pointermove', e=>{
   if(!pts.has(e.pointerId)) return; pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(gEdit){ gMove(e); return; }
   if(pinch && pts.size===2){ const [a,b]=[...pts.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(pinch.d>10) setLens(pinch.lens*d/pinch.d); }
 });
 const up = e=>{
   pts.delete(e.pointerId);
+  if(gEdit){ gDrag=null; return; }
   if(pts.size<2 && pinch){ pinch=null; downPos=null; return; }
   if(downPos && pts.size===0 && Math.hypot(e.clientX-downPos.x,e.clientY-downPos.y)<12 && Date.now()-downPos.t<300){
     const now=Date.now(); if(now-tapT<320){ document.body.classList.toggle('clean'); tapT=0; } else tapT=now;
