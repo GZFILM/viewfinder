@@ -529,9 +529,18 @@ let roll = null, gSign = 0;
 
 const aspectObj = () => ASPECTS.find(a=>a.id===S.aspect) || ASPECTS[0];
 const otherSensor = () => S.sensor==='ff' ? 's35' : 'ff';
+// Phone held upright = camera turned on its side: a wide frame turns vertical (16:9 -> 9:16).
+// Frames that are already vertical (4:5, 9:16) stay as they are.
+const upright = () => innerHeight > innerWidth && !calView;
 function frameMM(sid){
   const W = SENSORS[sid].w, H = W*9/16, r = aspectObj().r;
-  return r >= 16/9 - 1e-6 ? {w:W, h:W/r} : {w:H*r, h:H};
+  const f = r >= 16/9 - 1e-6 ? {w:W, h:W/r} : {w:H*r, h:H};
+  return upright() && f.w > f.h ? {w:f.h, h:f.w} : f;
+}
+function aspLabel(){
+  const a = aspectObj(); if(!(upright() && a.r > 1)) return a.label;
+  const [m, suf=''] = a.label.split(' '), [x, y] = m.split(':');
+  return y + ':' + x + (suf ? ' ' + suf : '');
 }
 function guessEq(label){
   if(/ultra|0[.,]5|wide angle|רחב/i.test(label)) return 13;
@@ -629,7 +638,7 @@ function draw(){
   ctx.stroke();
   // label
   ctx.font='600 11px "JetBrains Mono", monospace'; ctx.fillStyle='#fff'; ctx.textAlign='right'; ctx.textBaseline='top';
-  ctx.fillText(SENSORS[S.sensor].short+' · '+aspectObj().label, fx+fw-6, fy+6);
+  ctx.fillText(SENSORS[S.sensor].short+' · '+aspLabel(), fx+fw-6, fy+6);
 
   // level
   if(S.level && roll!==null){
@@ -670,10 +679,10 @@ function updateUI(){
   $('#hSensor').textContent = sn.short;
   $('#hLens').innerHTML = S.lens + '<small>mm</small>';
   $('#hEq').textContent = S.sensor==='ff' ? 'Full Frame' : '≈ ' + Math.round(eqFF()) + 'mm FF';
-  $('#hAspect').textContent = aspectObj().label;
+  $('#hAspect').textContent = aspLabel();
   $('#hFov').textContent = 'H ' + hfov().toFixed(0) + '°';
   $('#bSensorV').textContent = sn.btn || sn.short;
-  $('#bAspectV').textContent = aspectObj().label.replace(' DCI','').replace(':1','');
+  $('#bAspectV').textContent = aspLabel().replace(' DCI','').replace(/^1:|:1$/,'');
   $('#bLensV').textContent = S.lens;
   const lk = lookObj();
   $('#bLookV').textContent = lk.short; $('#bLookV').classList.toggle('acc', lk.n>0);
@@ -873,7 +882,7 @@ function capture(){
   x.fillStyle='#ecebe6'; x.font=`600 ${Math.round(bar*.42)}px "JetBrains Mono", monospace`; x.textBaseline='middle'; x.textAlign='left';
   const sn = SENSORS[S.sensor];
   const lk = lookObj();
-  const meta = `${sn.label}  ·  ${S.lens}mm${S.sensor!=='ff'?`  (≈${Math.round(eqFF())}mm FF)`:''}  ·  ${aspectObj().label}  ·  H ${hfov().toFixed(0)}°${lk.n?'  ·  '+lk.en:''}`;
+  const meta = `${sn.label}  ·  ${S.lens}mm${S.sensor!=='ff'?`  (≈${Math.round(eqFF())}mm FF)`:''}  ·  ${aspLabel()}  ·  H ${hfov().toFixed(0)}°${lk.n?'  ·  '+lk.en:''}`;
   const d = new Date(), stamp = d.toLocaleDateString('he-IL')+' '+d.toTimeString().slice(0,5);
   let fs = Math.round(bar*.42);
   for(;;){ x.font=`600 ${fs}px "JetBrains Mono", monospace`; if(x.measureText(meta+'   '+stamp).width <= ow-bar || fs<=8) break; fs--; }
@@ -1069,7 +1078,7 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 
 // ---------- boot ----------
 buildUI(); updateUI();
-const relayout = ()=>{ measureRegion(); lastVid=''; if(!$('#quick').hidden) relayoutQuick(); };
+const relayout = ()=>{ updateUI(); measureRegion(); lastVid=''; if(!$('#quick').hidden) relayoutQuick(); };
 addEventListener('resize', ()=>setTimeout(relayout,60));
 // Some Android phones keep a portrait-shaped stream after rotating to landscape (a narrow, cropped picture).
 // When the stream's shape no longer matches the screen, restart the camera.
