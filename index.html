@@ -458,12 +458,14 @@ const LOOKS = [
    text:'בהיר, נקי ורווי: לבנים נקיים, צבעים חיים ועור זוהר. הלוק של פרסומות לאוכל, לאופנה ולמוצרים, ושל קליפים. הכל נראה חדש, מזמין ויקר.'},
   {id:'horror', he:'אימה', short:'HORROR', en:'Horror', n:7,
    text:'קר, ירקרק ודהוי, עם שחורים עמוקים ושוליים כהים שמסתירים את מה שמחכה בפינות. הלוק של ״לזמן את הרוע״ ושל ״המסור״, שידוע בגוון הירוק החולני שלו. מתאים למתח, ללילה ולמרתפים.'},
+  {id:'horror70', he:'אימה שנות ה-70', short:'70s', en:'70s Horror · Carpenter', n:8,
+   text:'הלוק של ג׳ון קרפנטר ב״ליל המכשפות״ (1978) וב״הערפל״: לילה כחול עמוק, אור כתום חם של פנסי רחוב וחלונות, שחורים עמוקים, גרעין של פילם וזוהר קטן סביב מקורות אור. מתאים לרחוב בלילה, לפרברים שקטים ולצללית שמחכה בקצה הפריים.'},
 ];
 // ---------- versions (shown in the home screen and in "what's new") ----------
 const APP_VER = '2.1';
 const RELEASES = [
   {v:'2.1', date:'16.11.2026', items:[
-    '3 פילטרים חדשים לפי ז׳אנר: דרמה, פרסומת ואימה.',
+    '4 פילטרים חדשים לפי ז׳אנר: דרמה, פרסומת, אימה ואימה של שנות ה-70 בסגנון ג׳ון קרפנטר.',
     'שורת זכויות יוצרים במסך הבית.']},
   {v:'2.0', date:'16.11.2026', items:[
     'שם חדש לאפליקציה: View&Finder.',
@@ -606,6 +608,15 @@ void main(){
     // Commercial: bright, clean, punchy colour; whites kept neutral
     c=pow(c,vec3(.88))*1.04; c=sat(c,1.28);
     c=mix(c,c*c*(3.-2.*c),.35); c+=vec3(.0,.005,.015)*smoothstep(.6,1.,l);
+  } else if(look>7.5){
+    // 70s horror (Carpenter): deep blue night, warm orange practicals, crushed blacks, halation and film grain
+    vec2 o=vec2(.004,.007); vec3 b=(texture2D(t,uv+o).rgb+texture2D(t,uv-o).rgb+texture2D(t,uv+o.yx*vec2(1.,-1.)).rgb+texture2D(t,uv-o.yx*vec2(1.,-1.)).rgb)*.25;
+    c=sat(c,.8);
+    float hi=smoothstep(.6,.95,l);
+    c=mix(c*vec3(.8,.92,1.13)+vec3(0.,.01,.035), c*vec3(1.12,1.0,.8)+vec3(.04,.02,0.), hi);
+    c=clamp((c-.05)*1.2,0.,1.)*.92; c=mix(c,c*c*(3.-2.*c),.4);
+    c+=vec3(.35,.12,.04)*smoothstep(.7,1.,luma(b))*.35;
+    c+=(hash(floor(uv*vec2(900.,506.)))-.5)*.07;
   } else {
     // Horror: cold sickly green, drained colour, crushed blacks, dark and grainy
     c=sat(c,.45); c*=vec3(.88,1.02,.92);
@@ -613,7 +624,7 @@ void main(){
     c=clamp((c-.08)*1.22,0.,1.); c=pow(c,vec3(1.15))*.9;
     c+=(hash(floor(uv*vec2(960.,540.)))-.5)*.05;
   }
-  vec2 d=uv-.5; c*=1.-dot(d,d)*(look>6.5?2.2:look>5.5?.2:look>4.5?.9:look>3.5?1.5:look>2.5?1.0:.55);
+  vec2 d=uv-.5; c*=1.-dot(d,d)*(look>7.5?1.7:look>6.5?2.2:look>5.5?.2:look>4.5?.9:look>3.5?1.5:look>2.5?1.0:.55);
   gl_FragColor=vec4(clamp(c,0.,1.),1.);
 }`;
 function initGL(){
