@@ -221,6 +221,7 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
   .ver{margin-top:12px!important}
 }
 #start{overflow-y:auto}
+.upd{margin-top:18px;padding:10px 18px;border-radius:999px;background:rgba(95,209,138,.12);border:1px solid var(--ok);color:var(--ok);font-size:14px;font-weight:500}
 .ver{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.04em;direction:ltr}
 .copy{margin-top:6px;font-size:11px;color:var(--dim)}
 .copy .cl{font-family:var(--mono);letter-spacing:.12em;direction:ltr;unicode-bidi:isolate}
@@ -382,6 +383,7 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
       <button id="hNews"><span class="dot" id="newsDot" hidden>חדש</span><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>מה חדש<small id="hVer"></small></button>
       <button id="hShare"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8.2 10.9l7.6-3.8M8.2 13.1l7.6 3.8"/></svg>שתף את האפליקציה</button>
     </nav>
+    <button class="upd" id="updBtn" hidden></button>
     <div class="ver" id="verLine"></div>
     <div class="copy"><span class="cl">© 2026 G.Z. MOTION LAB</span> · כל הזכויות שמורות</div>
   </div>
@@ -462,10 +464,14 @@ const LOOKS = [
    text:'הלוק של ג׳ון קרפנטר ב״ליל המכשפות״ (1978) וב״הערפל״: לילה כחול עמוק, אור כתום חם של פנסי רחוב וחלונות, שחורים עמוקים, גרעין של פילם וזוהר קטן סביב מקורות אור. מתאים לרחוב בלילה, לפרברים שקטים ולצללית שמחכה בקצה הפריים.'},
 ];
 // ---------- versions (shown in the home screen and in "what's new") ----------
-const APP_VER = '2.1';
+const APP_VER = '2.2';
 const RELEASES = [
+  {v:'2.2', date:'16.11.2026', items:[
+    'בדיקת עדכונים: כשיש גרסה חדשה, מופיע במסך הבית כפתור ״עדכן עכשיו״.',
+    'פילטר אימה של שנות ה-70 בסגנון ג׳ון קרפנטר.',
+    'שורה חדשה מתחת ללוגו: Cinephile and filmmaker viewfinder.']},
   {v:'2.1', date:'16.11.2026', items:[
-    '4 פילטרים חדשים לפי ז׳אנר: דרמה, פרסומת, אימה ואימה של שנות ה-70 בסגנון ג׳ון קרפנטר.',
+    '3 פילטרים חדשים לפי ז׳אנר: דרמה, פרסומת ואימה.',
     'שורת זכויות יוצרים במסך הבית.']},
   {v:'2.0', date:'16.11.2026', items:[
     'שם חדש לאפליקציה: View&Finder.',
@@ -1132,6 +1138,23 @@ $('#hShare').onclick = shareApp;
 $('#hSettings').onclick = async ()=>{ if(!stream) await $('#go').onclick(); if(stream) openSheet(); };
 $('#goHome').onclick = showHome;
 renderHome();
+
+// ---------- update check: compare with the version on the site, offer a fresh reload ----------
+let newVer = null;
+async function checkUpdate(){
+  try{
+    const r = await fetch(location.pathname + '?check=' + Date.now(), {cache:'no-store'});
+    const m = (await r.text()).match(/const APP_VER = '([^']+)'/);
+    if(m && m[1] !== APP_VER){
+      newVer = m[1];
+      const b = $('#updBtn'); b.hidden = false; b.textContent = `גרסה ${newVer} זמינה · עדכן עכשיו`;
+      $('#verLine').innerHTML = `View&amp;Finder ${APP_VER} · <b style="color:var(--accent)">●</b> Update available`;
+    }
+  }catch(e){}
+}
+$('#updBtn').onclick = ()=>location.replace(location.pathname + '?v=' + encodeURIComponent(newVer||Date.now()));
+checkUpdate();
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkUpdate(); });
 $('#vClose').onclick=closeViewer;
 $('#vSave').onclick=()=>{ if(viewing) saveToPhone(new File([viewing.blob], viewing.name, {type:'image/jpeg'}), false); };
 $('#vShare').onclick=()=>{ if(viewing && !shareFile(new File([viewing.blob], viewing.name, {type:'image/jpeg'}))) toast('השיתוף לא זמין בדפדפן הזה'); };
