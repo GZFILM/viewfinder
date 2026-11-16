@@ -375,6 +375,9 @@ const SENSORS = {
   ff120:  {label:'FX3 · 4K 120p',     short:'FX3·120',  btn:'FX3 120', w:32.7, hint:'FX3 ב-4K 100/120p: קרופ של בערך 1.1×, כלומר 50 מ״מ נראה כמו 55 מ״מ.'},
   fx5:    {label:'FX5 · Full Frame',  short:'FX5',      w:35.9, hint:'FX5 (2026): חיישן Full Frame ברוחב 35.9 מ״מ. ב-4K עד 60p הפריים מלא, והעדשה מתנהגת כפי שכתוב עליה.'},
   fx5hfr: {label:'FX5 · 4K 120p',     short:'FX5·120',  btn:'FX5 120', w:32.4, hint:'FX5 ב-4K 100/120p: קרופ של בערך 1.1× (קריאה של 4.5K מתוך החיישן), כך שהפריים צר קצת יותר.'},
+  s8:     {label:'Super 8 · פילם 8 מ״מ', short:'S8', w:5.36, aspect:'4:3', lens0:8, minLens:4,
+           primes:[4,5,6,7,8,10,12,15,20,25,30,40,50],
+           hint:'Super 8: פילם הביתי של קודאק משנת 1965. הפריים זעיר, 5.36×4.01 מ״מ ביחס 4:3, קרופ של בערך 6.7× לעומת Full Frame. לכן עדשת 8 מ״מ במצלמת סופר 8 נראית כמו 54 מ״מ. נסה גם את הפילטר ״סופר 8״.'},
 };
 const ASPECTS = [
   {id:'16:9', r:16/9,   label:'16:9'},
@@ -398,6 +401,8 @@ const LOOKS = [
    text:'תהליך מעבדה שבו מדלגים על שלב ההלבנה של הפילם: צבע דהוי וניגודיות קשה. ״להציל את טוראי ריאן״ ו״שבעה חטאים״ הם הדוגמאות המוכרות. מתאים למלחמה, מתח ועולם אפור.'},
   {id:'noir',  he:'נואר', short:'NOIR', en:'Noir B&W', n:3,
    text:'שחור-לבן קונטרסטי עם גרעין של פילם, כמו בפילם נואר של שנות ה-40 וב״רומא״ של קוארון. כלי עבודה של צלמים: בלי צבע רואים מיד אם יש הפרדה באור.'},
+  {id:'super8',he:'סופר 8', short:'S8', en:'Super 8 Film', n:4,
+   text:'סרט ביתי משנות ה-70: צבע חם ודהוי, גרעין גס, שריטות ואבק שקופצים מפריים לפריים, הבהוב של אור ורעד קטן של הפילם במצלמה. מתאים לפלאשבקים, זיכרונות וקליפים. הכי טוב יחד עם חיישן Super 8.'},
 ];
 const EQ_PRESETS = [{v:13,label:'0.5× רחבה'},{v:24,label:'אייפון 1×'},{v:26,label:'אנדרואיד 1× (כמו Vivo Y36)'},{v:48,label:'2×'},{v:77,label:'3×'},{v:120,label:'5×'}];
 
@@ -481,6 +486,7 @@ uniform sampler2D t; uniform float look; uniform float time; varying vec2 uv;
 float luma(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}
 vec3 sat(vec3 c,float s){return mix(vec3(luma(c)),c,s);}
 float hash(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233))+time)*43758.5453);}
+float rnd(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
 void main(){
   vec3 c=texture2D(t,uv).rgb; float l=luma(c);
   if(look<1.5){
@@ -491,11 +497,29 @@ void main(){
     vec3 L=vec3(l);
     vec3 o=mix(2.*c*L, 1.-2.*(1.-c)*(1.-L), step(.5,L));
     c=mix(c,o,.6); c=sat(c,.45); c=clamp((c-.5)*1.15+.5,0.,1.); c*=vec3(.95,.95,.92);
-  } else {
+  } else if(look<3.5){
     float y=mix(l,smoothstep(.05,.95,l),.7); y=mix(y,y*y*(3.-2.*y),.35)*.96;
     y+=(hash(floor(uv*vec2(1280.,720.)))-.5)*.08; c=vec3(y);
+  } else {
+    // Super 8: 18 fps gate weave, warm faded stock, flicker, coarse grain, scratches and dust
+    float fr=floor(time*18.);
+    vec2 u=uv+(vec2(rnd(vec2(fr,1.)),rnd(vec2(fr,2.)))-.5)*vec2(.004,.006);
+    c=texture2D(t,u).rgb; c=sat(c,.72);
+    c=c*vec3(1.1,1.0,.8)+vec3(.05,.025,0.); c=mix(vec3(.07,.05,.03),c,.9);
+    c=clamp((c-.5)*1.12+.5,0.,1.);
+    c*=1.+(rnd(vec2(fr,3.))-.5)*.1;
+    c+=(hash(floor(uv*vec2(560.,420.)))-.5)*.16;
+    for(int i=0;i<3;i++){
+      float fi=float(i), sx=rnd(vec2(floor(time*1.5)+fi*7.,fi));
+      float d=abs(uv.x-sx-sin(uv.y*5.+fi*3.)*.003-(rnd(vec2(fr,fi+9.))-.5)*.004);
+      float on=step(.45,rnd(vec2(fr,fi+20.)));
+      c=mix(c,fi<1.5?vec3(.92,.9,.82):vec3(.08,.06,.05),(1.-smoothstep(0.,.0016,d))*on*.7);
+    }
+    vec2 g=floor(uv*vec2(48.,36.)); vec2 f=fract(uv*vec2(48.,36.))-.5;
+    float dust=step(.994,rnd(g+fr*1.37))*(1.-smoothstep(.06,.22,length(f*vec2(1.,1.+rnd(g)))));
+    c=mix(c,vec3(.04,.03,.02),dust*.85);
   }
-  vec2 d=uv-.5; c*=1.-dot(d,d)*(look>2.5?1.0:.55);
+  vec2 d=uv-.5; c*=1.-dot(d,d)*(look>3.5?1.5:look>2.5?1.0:.55);
   gl_FragColor=vec4(clamp(c,0.,1.),1.);
 }`;
 function initGL(){
@@ -696,7 +720,7 @@ function updateUI(){
   document.body.classList.toggle('graded', lk.n>0 && glOK);
   $('#gl').hidden = !(lk.n>0 && glOK);
   if(!$('#quick').hidden) renderQuick(quickKind);
-  $('#lensRange').value = S.lens; $('#lensOut').textContent = S.lens + 'mm';
+  $('#lensRange').min = minLens(); $('#lensRange').value = S.lens; $('#lensOut').textContent = S.lens + 'mm';
   $('#compare').checked = S.compare; $('#level').checked = S.level; $('#capGuides').checked = S.capGuides;
   $('#sensorHint').textContent = sn.hint;
   markChips('#sensorChips', S.sensor); markChips('#aspectChips', S.aspect);
@@ -713,12 +737,20 @@ function chips(sel, items, onPick){
   const el = $(sel); el.innerHTML='';
   for(const it of items){ const b=document.createElement('button'); b.dataset.v=String(it.v); b.innerHTML=it.label; b.onclick=()=>onPick(it.v,b); el.appendChild(b); }
 }
-function setLens(v){ S.lens = Math.max(8, Math.min(300, Math.round(v))); updateUI(); }
+const minLens = () => SENSORS[S.sensor].minLens || 8;
+function setLens(v){ S.lens = Math.max(minLens(), Math.min(300, Math.round(v))); updateUI(); }
+// Super 8 brings its own 4:3 frame and short lenses; leaving it returns to a cinema setup
+function setSensor(k){
+  const was = SENSORS[S.sensor], now = SENSORS[k]; S.sensor = k;
+  if(now.aspect && was !== now){ S.aspect = now.aspect; S.lens = now.lens0; }
+  else if(was.aspect && !now.aspect){ S.aspect = '16:9'; S.lens = 35; }
+  updateUI();
+}
 
 function buildUI(){
   $('#bLens').onclick=()=>toggleQuick('lens');
   $('#bLook').onclick=()=>toggleQuick('look');
-  chips('#sensorChips', Object.entries(SENSORS).map(([k,v])=>({v:k,label:v.label})), v=>{S.sensor=v;updateUI()});
+  chips('#sensorChips', Object.entries(SENSORS).map(([k,v])=>({v:k,label:v.label})), v=>setSensor(v));
   chips('#aspectChips', ASPECTS.map(a=>({v:a.id,label:`<span class="num">${a.label}</span>`})), v=>{S.aspect=v;updateUI()});
   chips('#guideChips', GUIDES.map(g=>({v:g.id,label:g.he})), v=>{
     const i=S.guides.indexOf(v); if(i>=0) S.guides.splice(i,1); else S.guides.push(v);
@@ -756,9 +788,9 @@ function renderQuick(kind){
   if(kind==='lens'){
     const eq = isFull(S.sensor) ? '' : ` · ≈ ${Math.round(eqFF())}mm FF`;
     q.innerHTML = `<h3><span>עדשה</span><span class="num">${S.lens}mm${eq}</span></h3>
-      <div class="qgrid">${PRIMES.map(l=>`<button data-l="${l}" class="${l===S.lens?'on':''}">${l}</button>`).join('')}</div>
-      <div class="qrow"><button id="qMinus" aria-label="פחות">−</button><input type="range" id="qRange" min="8" max="200" step="1" value="${S.lens}" aria-label="אורך מוקד"><button id="qPlus" aria-label="יותר">+</button></div>
-      <p class="qnote">הפס מתאים לעדשות זום, למשל Sigma 18-50 או Sony 16-55. אפשר גם לצבוט במסך.</p>`;
+      <div class="qgrid">${(SENSORS[S.sensor].primes||PRIMES).map(l=>`<button data-l="${l}" class="${l===S.lens?'on':''}">${l}</button>`).join('')}</div>
+      <div class="qrow"><button id="qMinus" aria-label="פחות">−</button><input type="range" id="qRange" min="${minLens()}" max="200" step="1" value="${S.lens}" aria-label="אורך מוקד"><button id="qPlus" aria-label="יותר">+</button></div>
+      <p class="qnote">${S.sensor==='s8'?'מצלמות סופר 8 הגיעו בדרך כלל עם זום מובנה, למשל 6-60 מ״מ.':'הפס מתאים לעדשות זום, למשל Sigma 18-50 או Sony 16-55.'} אפשר גם לצבוט במסך.</p>`;
     q.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{setLens(+b.dataset.l); closeQuick();});
     $('#qRange').oninput=e=>setLens(+e.target.value);
     $('#qMinus').onclick=()=>setLens(S.lens-1); $('#qPlus').onclick=()=>setLens(S.lens+1);
@@ -776,7 +808,7 @@ function renderQuick(kind){
       <h3 style="margin-top:14px"><span>יחס מסך</span></h3>
       <div class="qgrid">${ASPECTS.map(a=>`<button data-a="${a.id}" class="${a.id===S.aspect?'on':''}" style="font-size:13px">${a.label.replace(' DCI','')}</button>`).join('')}</div>
       <div class="qrow" style="direction:rtl"><label class="switch" style="flex:1"><span>השוואה ל${otherSensor()==='s35'?'-FX30':'-Full Frame'}</span><input type="checkbox" id="qCmp" ${S.compare?'checked':''}></label></div>`;
-    q.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{S.sensor=b.dataset.s; updateUI();});
+    q.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>setSensor(b.dataset.s));
     q.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{S.aspect=b.dataset.a; updateUI();});
     $('#qCmp').onchange=e=>{S.compare=e.target.checked; updateUI();};
   } else if(kind==='look'){
