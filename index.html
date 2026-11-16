@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Viewfinder FX30</title>
+<title>View&amp;Finder</title>
 <meta name="theme-color" content="#0c0d10">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Viewfinder">
+<meta name="apple-mobile-web-app-title" content="View&amp;Finder">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
@@ -199,6 +199,7 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
 .brand::before{top:0;left:0;border-right:0;border-bottom:0}
 .brand::after{bottom:0;right:0;border-left:0;border-top:0}
 .brand h1{margin:0;font-family:var(--mono);font-weight:600;font-size:28px;letter-spacing:.08em;direction:ltr}
+.brand .amp{color:var(--accent);margin:0 .06em}
 .brand div{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.3em;margin-top:4px;direction:ltr}
 .card p{color:#c9c8c2;line-height:1.65;font-size:15px;margin:0 0 6px}
 .card .small{font-size:12.5px;color:var(--dim)}
@@ -298,7 +299,7 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
     <p class="hint">המספר הוא אורך המוקד של עדשת הטלפון, בשפה של Full Frame. כל המסגרות באפליקציה מחושבות ממנו, ולכן כדאי לכייל אותו פעם אחת לכל טלפון.</p>
 
     <div class="calib">
-      <h4>שיטה 1: מטר וקיר (בלי ה-FX30)</h4>
+      <h4>שיטה 1: מטר וקיר (בלי המצלמה)</h4>
       <ol class="csteps">
         <li>עמוד ישר מול קיר, בדיוק <b>מטר אחד</b> ממנו. המטר נמדד מהקיר עד הטלפון.</li>
         <li>החזק את הטלפון <b>לרוחב</b> ולחץ על הכפתור למטה. האפליקציה תראה את כל מה שמצלמת הטלפון רואה.</li>
@@ -312,7 +313,7 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
       </div>
       <div class="cres"><span id="calRes1">הקלד את הרוחב שמדדת</span><button class="cbtn pri" id="calApply1" disabled>השתמש במספר הזה</button></div>
 
-      <h4>שיטה 2: מול ה-FX30 (הכי מדויק)</h4>
+      <h4>שיטה 2: מול המצלמה (הכי מדויק)</h4>
       <ol class="csteps">
         <li>שים את המצלמה והטלפון זה ליד זה, באותה נקודה ומכוונים לאותו מקום.</li>
         <li>במצלמה, נסה עדשות או זום עד שהמצלמה רואה <b>בדיוק</b> את אותו רוחב כמו מצלמת הטלפון.</li>
@@ -336,7 +337,7 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
 
 <div id="start">
   <div class="card">
-    <div class="brand"><h1>VIEWFINDER</h1><div>FX30 · S35 · FULL FRAME</div></div>
+    <div class="brand"><h1>VIEW<span class="amp">&amp;</span>FINDER</h1><div>FX30 · FX3 · FX5</div></div>
     <div><button class="go" id="go">הפעל מצלמה</button></div>
     <div id="err" hidden></div>
   </div>
@@ -367,9 +368,13 @@ const PHI = 1.6180339887;
 const PHONE_LONG = 34.6; // long side (mm) of a 4:3 frame whose diagonal equals full frame's 43.27mm
 
 const SENSORS = {
-  ff:     {label:'Full Frame',        short:'FF',     w:36,   hint:'Full Frame: חיישן 36×24 מ״מ, כמו FX3, A7S III או FX6. העדשה מתנהגת כפי שכתוב עליה.'},
-  s35:    {label:'FX30 · Super 35',   short:'S35',    w:23.3, hint:'FX30: חיישן Super 35 (APS-C) ברוחב 23.3 מ״מ. קרופ של בערך 1.5×, כלומר 35 מ״מ על ה-FX30 נראה כמו 53 מ״מ על Full Frame.'},
-  s35hfr: {label:'FX30 · 4K 120p',    short:'S35·120', btn:'120p', w:21.2, hint:'FX30 ב-4K 100/120p: קרופ נוסף של בערך 1.1× מעל ה-Super 35, כך שהפריים צר עוד קצת.'},
+  // keys 'ff', 's35', 's35hfr' are kept from earlier versions so saved settings still load
+  s35:    {label:'FX30 · Super 35',   short:'FX30',     w:23.3, hint:'FX30: חיישן Super 35 (APS-C) ברוחב 23.3 מ״מ. קרופ של בערך 1.5×, כלומר 35 מ״מ על ה-FX30 נראה כמו 53 מ״מ על Full Frame.'},
+  s35hfr: {label:'FX30 · 4K 120p',    short:'FX30·120', btn:'FX30 120', w:21.2, hint:'FX30 ב-4K 100/120p: קרופ נוסף של בערך 1.1× מעל ה-Super 35, כך שהפריים צר עוד קצת.'},
+  ff:     {label:'FX3 · Full Frame',  short:'FX3',      w:36,   hint:'FX3: חיישן Full Frame ברוחב 36 מ״מ (כמו A7S III). העדשה מתנהגת כפי שכתוב עליה.'},
+  ff120:  {label:'FX3 · 4K 120p',     short:'FX3·120',  btn:'FX3 120', w:32.7, hint:'FX3 ב-4K 100/120p: קרופ של בערך 1.1×, כלומר 50 מ״מ נראה כמו 55 מ״מ.'},
+  fx5:    {label:'FX5 · Full Frame',  short:'FX5',      w:35.9, hint:'FX5 (2026): חיישן Full Frame ברוחב 35.9 מ״מ. ב-4K עד 60p הפריים מלא, והעדשה מתנהגת כפי שכתוב עליה.'},
+  fx5hfr: {label:'FX5 · 4K 120p',     short:'FX5·120',  btn:'FX5 120', w:32.4, hint:'FX5 ב-4K 100/120p: קרופ של בערך 1.1× (קריאה של 4.5K מתוך החיישן), כך שהפריים צר קצת יותר.'},
 };
 const ASPECTS = [
   {id:'16:9', r:16/9,   label:'16:9'},
@@ -528,7 +533,8 @@ let region = {x:0,y:0,w:innerWidth,h:innerHeight};
 let roll = null, gSign = 0;
 
 const aspectObj = () => ASPECTS.find(a=>a.id===S.aspect) || ASPECTS[0];
-const otherSensor = () => S.sensor==='ff' ? 's35' : 'ff';
+const isFull = k => SENSORS[k].w >= 35;           // a full-width full-frame mode (no crop)
+const otherSensor = () => SENSORS[S.sensor].w >= 30 ? 's35' : 'ff';
 // Phone held upright = camera turned on its side: a wide frame turns vertical (16:9 -> 9:16).
 // Frames that are already vertical (4:5, 9:16) stay as they are.
 const upright = () => innerHeight > innerWidth && !calView;
@@ -678,7 +684,7 @@ function updateUI(){
   const sn = SENSORS[S.sensor];
   $('#hSensor').textContent = sn.short;
   $('#hLens').innerHTML = S.lens + '<small>mm</small>';
-  $('#hEq').textContent = S.sensor==='ff' ? 'Full Frame' : '≈ ' + Math.round(eqFF()) + 'mm FF';
+  $('#hEq').textContent = isFull(S.sensor) ? 'Full Frame' : '≈ ' + Math.round(eqFF()) + 'mm FF';
   $('#hAspect').textContent = aspLabel();
   $('#hFov').textContent = 'H ' + hfov().toFixed(0) + '°';
   $('#bSensorV').textContent = sn.btn || sn.short;
@@ -748,7 +754,7 @@ function relayoutQuick(){
 function renderQuick(kind){
   const q = $('#quick');
   if(kind==='lens'){
-    const eq = S.sensor==='ff' ? '' : ` · ≈ ${Math.round(eqFF())}mm FF`;
+    const eq = isFull(S.sensor) ? '' : ` · ≈ ${Math.round(eqFF())}mm FF`;
     q.innerHTML = `<h3><span>עדשה</span><span class="num">${S.lens}mm${eq}</span></h3>
       <div class="qgrid">${PRIMES.map(l=>`<button data-l="${l}" class="${l===S.lens?'on':''}">${l}</button>`).join('')}</div>
       <div class="qrow"><button id="qMinus" aria-label="פחות">−</button><input type="range" id="qRange" min="8" max="200" step="1" value="${S.lens}" aria-label="אורך מוקד"><button id="qPlus" aria-label="יותר">+</button></div>
@@ -769,7 +775,7 @@ function renderQuick(kind){
       <div class="qlist">${Object.entries(SENSORS).map(([k,v])=>`<button data-s="${k}" class="${k===S.sensor?'on':''}">${v.label}<small>${v.w} mm</small></button>`).join('')}</div>
       <h3 style="margin-top:14px"><span>יחס מסך</span></h3>
       <div class="qgrid">${ASPECTS.map(a=>`<button data-a="${a.id}" class="${a.id===S.aspect?'on':''}" style="font-size:13px">${a.label.replace(' DCI','')}</button>`).join('')}</div>
-      <div class="qrow" style="direction:rtl"><label class="switch" style="flex:1"><span>השוואה ל${S.sensor==='ff'?'-FX30':'-Full Frame'}</span><input type="checkbox" id="qCmp" ${S.compare?'checked':''}></label></div>`;
+      <div class="qrow" style="direction:rtl"><label class="switch" style="flex:1"><span>השוואה ל${otherSensor()==='s35'?'-FX30':'-Full Frame'}</span><input type="checkbox" id="qCmp" ${S.compare?'checked':''}></label></div>`;
     q.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{S.sensor=b.dataset.s; updateUI();});
     q.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{S.aspect=b.dataset.a; updateUI();});
     $('#qCmp').onchange=e=>{S.compare=e.target.checked; updateUI();};
@@ -882,7 +888,7 @@ function capture(){
   x.fillStyle='#ecebe6'; x.font=`600 ${Math.round(bar*.42)}px "JetBrains Mono", monospace`; x.textBaseline='middle'; x.textAlign='left';
   const sn = SENSORS[S.sensor];
   const lk = lookObj();
-  const meta = `${sn.label}  ·  ${S.lens}mm${S.sensor!=='ff'?`  (≈${Math.round(eqFF())}mm FF)`:''}  ·  ${aspLabel()}  ·  H ${hfov().toFixed(0)}°${lk.n?'  ·  '+lk.en:''}`;
+  const meta = `${sn.label}  ·  ${S.lens}mm${!isFull(S.sensor)?`  (≈${Math.round(eqFF())}mm FF)`:''}  ·  ${aspLabel()}  ·  H ${hfov().toFixed(0)}°${lk.n?'  ·  '+lk.en:''}`;
   const d = new Date(), stamp = d.toLocaleDateString('he-IL')+' '+d.toTimeString().slice(0,5);
   let fs = Math.round(bar*.42);
   for(;;){ x.font=`600 ${fs}px "JetBrains Mono", monospace`; if(x.measureText(meta+'   '+stamp).width <= ow-bar || fs<=8) break; fs--; }
@@ -997,7 +1003,7 @@ $('#bkFile').onchange = async e=>{
     for(const s of (j.shots||[])){ await albumAdd({id:s.id, name:s.name, meta:s.meta, blob:await dataURLToBlob(s.data)}); n++; }
     updateUI(); updateThumb(); lastVid='';
     toast(`שוחזר: הגדרות ו-${n} תמונות`);
-  }catch(err){ toast('זה לא קובץ גיבוי של Viewfinder'); }
+  }catch(err){ toast('זה לא קובץ גיבוי של View&Finder'); }
 };
 
 // ---------- calibration ----------
