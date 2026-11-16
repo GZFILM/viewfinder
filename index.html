@@ -425,8 +425,9 @@ const GUIDES = [
   {id:'spiral', he:'ספירלת הזהב', en:'Fibonacci Spiral',
    text:'<b>מקור:</b> סדרת פיבונאצ׳י ויחס הזהב, שמזוהים עם ציור קלאסי. ״הגל הגדול״ של הוקוסאי מנותח פעמים רבות כך. <b>בקולנוע:</b> שים את נקודת העניין (פנים, ידיים, אובייקט) ב״עין״ של הספירלה, ותן לקווים בסצנה ללכת לאורך הקשת. כפתור ״סובב״ מחליף כיוון.',
    draw(p,x,y,w,h,flip){
-     let rx=0,ry=0,rw=PHI,rh=1; const sx=w/PHI, sy=h;
-     const M=(px,py)=>flipPt(x+px*sx,y+py*sy,x,y,w,h,flip);
+     // the spiral is built in a PHI x 1 box; in a vertical frame the box is turned on its side instead of squashed
+     let rx=0,ry=0,rw=PHI,rh=1; const tr=h>w;
+     const M=(px,py)=>flipPt(tr ? x+py*w : x+px*w/PHI, tr ? y+px*h/PHI : y+py*h, x,y,w,h,flip);
      for(let i=0;i<10;i++){
        const d=i%4; let s,cx,cy,a0;
        if(d===0){s=rh;cx=rx+s;cy=ry+s;a0=Math.PI;
