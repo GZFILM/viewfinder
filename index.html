@@ -78,7 +78,7 @@ body.graded #cam{opacity:0}
 #bAlbum .thumb{width:30px;height:30px;border-radius:6px;border:1.5px solid rgba(255,255,255,.7);background:#222 center/cover no-repeat}
 
 /* album */
-#album{position:fixed;inset:0;z-index:25;background:var(--bg);display:flex;flex-direction:column}
+#album{position:fixed;inset:0;z-index:33;background:var(--bg);display:flex;flex-direction:column}
 #album header{display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:calc(env(safe-area-inset-top,0px) + 10px) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
 #album header h2{margin:0;font-size:17px}
@@ -87,7 +87,7 @@ body.graded #cam{opacity:0}
   padding:8px max(8px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(8px,env(safe-area-inset-left,0px))}
 #agrid button{aspect-ratio:16/10;background:#000 center/cover no-repeat;border-radius:4px;max-width:100%}
 #agrid .empty{grid-column:1/-1;text-align:center;color:var(--dim);padding:40px 16px;font-size:14px;line-height:1.6}
-#viewer{position:fixed;inset:0;z-index:26;background:#000;display:flex;flex-direction:column}
+#viewer{position:fixed;inset:0;z-index:34;background:#000;display:flex;flex-direction:column}
 #viewer img{flex:1;min-height:0;width:100%;object-fit:contain}
 #viewer .bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
   padding:10px max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 10px) max(12px,env(safe-area-inset-left,0px));background:var(--panel-solid)}
@@ -205,6 +205,37 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
 .brand div{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.3em;margin-top:4px;direction:ltr}
 .card p{color:#c9c8c2;line-height:1.65;font-size:15px;margin:0 0 6px}
 .card .small{font-size:12.5px;color:var(--dim)}
+.hmenu{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:22px;width:min(340px,86vw)}
+.hmenu button{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:10px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13.5px;color:var(--fg)}
+.hmenu button:active{background:rgba(255,255,255,.1)}
+.hmenu svg{width:24px;height:24px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.hmenu small{font-family:var(--mono);font-size:10.5px;color:var(--dim);direction:ltr}
+.hmenu .dot{position:absolute;top:8px;inset-inline-end:8px;background:var(--accent);color:var(--accent-ink);font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px}
+@media (orientation:landscape) and (max-height:600px){
+  .hmenu{grid-template-columns:repeat(4,1fr);width:min(560px,92vw);margin-top:16px}
+  .hmenu button{padding:10px 6px;font-size:12.5px}
+  .brand{margin-bottom:6px}
+  .go{margin-top:8px!important}
+  .ver{margin-top:12px!important}
+}
+#start{overflow-y:auto}
+.ver{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.04em;direction:ltr}
+.ver b{color:var(--ok);font-weight:500}
+#news{position:fixed;inset:0;z-index:35;background:var(--bg);display:flex;flex-direction:column}
+#news header{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+#news header h2{margin:0;font-size:17px}
+#newsBody{flex:1;overflow-y:auto;padding:8px max(18px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(18px,env(safe-area-inset-left,0px));max-width:640px;width:100%;margin:0 auto}
+.rel{padding:16px 0;border-bottom:1px solid var(--line)}
+.rel:last-child{border-bottom:0}
+.rel h3{margin:0;font-size:16px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.rel h3 .num{color:var(--accent)}
+.rel h3 span:last-child{font-size:12px;color:var(--dim);font-weight:400}
+.rel .badge{font-size:10.5px;background:var(--ok);color:#06210f;padding:1px 7px;border-radius:999px;font-weight:700}
+.rel ul{margin:10px 0 0;padding-inline-start:18px;color:#cfcec8;font-size:14px;line-height:1.7}
+.home-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-size:13px;margin-inline-start:auto;margin-inline-end:8px}
+.home-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linejoin:round}
 .go{margin-top:18px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16px;padding:13px 28px;border-radius:8px}
 #err{color:var(--warn);font-size:13.5px;line-height:1.6;margin-top:14px}
 
@@ -258,7 +289,7 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
 <div id="quick" hidden></div>
 <div id="scrim" hidden></div>
 <aside id="sheet" hidden>
-  <div class="sheet-head"><h2>הגדרות עינית</h2><button class="x" id="closeSheet" aria-label="סגור">×</button></div>
+  <div class="sheet-head"><h2>הגדרות עינית</h2><button class="home-btn" id="goHome"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg>בית</button><button class="x" id="closeSheet" aria-label="סגור">×</button></div>
 
   <section class="grp">
     <h3>מצלמה וחיישן</h3>
@@ -342,8 +373,20 @@ body.calib #dock,body.calib #hud,body.calib #warn{display:none!important}
     <div class="brand"><h1>VIEW<span class="amp">&amp;</span>FINDER</h1><div class="tag">Find your perfect frame</div></div>
     <div><button class="go" id="go">הפעל מצלמה</button></div>
     <div id="err" hidden></div>
+    <nav class="hmenu" aria-label="תפריט">
+      <button id="hAlbum"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg>אלבום</button>
+      <button id="hSettings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>הגדרות וכיול</button>
+      <button id="hNews"><span class="dot" id="newsDot" hidden>חדש</span><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>מה חדש<small id="hVer"></small></button>
+      <button id="hShare"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8.2 10.9l7.6-3.8M8.2 13.1l7.6 3.8"/></svg>שתף את האפליקציה</button>
+    </nav>
+    <div class="ver" id="verLine"></div>
   </div>
 </div>
+
+<section id="news" hidden>
+  <header><h2>מה חדש ב-View&amp;Finder</h2><button class="x" id="newsClose" aria-label="סגור">×</button></header>
+  <div id="newsBody"></div>
+</section>
 
 <section id="album" hidden>
   <header><div><h2>אלבום</h2><span id="albCount"></span></div><button class="x" id="albClose" aria-label="סגור אלבום">×</button></header>
@@ -405,6 +448,26 @@ const LOOKS = [
    text:'שחור-לבן קונטרסטי עם גרעין של פילם, כמו בפילם נואר של שנות ה-40 וב״רומא״ של קוארון. כלי עבודה של צלמים: בלי צבע רואים מיד אם יש הפרדה באור.'},
   {id:'super8',he:'סופר 8', short:'S8', en:'Super 8 Film', n:4,
    text:'סרט ביתי משנות ה-70: צבע חם ודהוי, גרעין גס, שריטות ואבק שקופצים מפריים לפריים, הבהוב של אור ורעד קטן של הפילם במצלמה. מתאים לפלאשבקים, זיכרונות וקליפים. הכי טוב יחד עם חיישן Super 8.'},
+];
+// ---------- versions (shown in the home screen and in "what's new") ----------
+const APP_VER = '2.0';
+const RELEASES = [
+  {v:'2.0', date:'16.11.2026', items:[
+    'שם חדש לאפליקציה: View&Finder.',
+    'מסך בית עם תפריט: אלבום, הגדרות, מה חדש ושיתוף.',
+    'בחירת מצלמה: FX30, FX3 וה-FX5 החדשה של סוני (2026). לכל אחת יש גם מצב 4K 120p עם הקרופ האמיתי שלו.',
+    'פילם 8 מ״מ (Super 8): הפריים הקטן ביחס 4:3, עם עדשות משלו.',
+    'פילטר סופר 8: גרעין, שריטות, אבק, הבהוב ורעד של פילם.',
+    'כפתור להחלפה בין המצלמה האחורית לקדמית.',
+    'כשמחזיקים את הטלפון לאורך, המסגרת מסתובבת (16:9 הופך ל-9:16).',
+    'ספירלת הזהב מסתובבת יפה גם בפריים אנכי.',
+    'כפתור העדשה קטן יותר ולא נוגע בכפתור הצילום.']},
+  {v:'1.0', date:'15.11.2026', items:[
+    'עינית במאי ל-FX30 ולפול פריים, עם כל אורכי המוקד ויחסי המסך.',
+    '10 קומפוזיציות: שלישים, יחס הזהב, ספירלה, סימטריה ועוד.',
+    '3 פילטרים קולנועיים: בלוקבסטר, בליץ׳ ביי-פאס ונואר.',
+    'פלס אופק, צילום פריים עם נתוני העדשה, ואלבום בתוך האפליקציה.',
+    'גיבוי ושחזור לקובץ אחד, וכיול של עדשת הטלפון.']},
 ];
 const EQ_PRESETS = [{v:13,label:'0.5× רחבה'},{v:24,label:'אייפון 1×'},{v:26,label:'אנדרואיד 1× (כמו Vivo Y36)'},{v:48,label:'2×'},{v:77,label:'3×'},{v:120,label:'5×'}];
 
@@ -474,7 +537,7 @@ const GUIDES = [
 
 // ---------- state ----------
 const DEF = {sensor:'s35', lens:35, aspect:'16:9', guides:['thirds'], compare:false, mask:.55, color:'#ffffff',
-  flip:0, level:false, capGuides:true, phoneEq:{}, deviceId:'', lastGuide:'thirds', look:'none', backId:'', v:2};
+  flip:0, level:false, capGuides:true, phoneEq:{}, deviceId:'', lastGuide:'thirds', look:'none', backId:'', seenVer:'', v:2};
 let S = Object.assign({}, DEF);
 try{ const j = JSON.parse(localStorage.getItem('vf-state')||'null'); if(j) S = Object.assign({}, DEF, j); }catch(e){}
 if(!(S.v>=2)){ S.compare = false; S.v = 2; } // v2: the main frame fills the screen; comparison is opt-in
@@ -1001,6 +1064,35 @@ function closeAlbum(){ $('#album').hidden=true; albumUrls.forEach(u=>URL.revokeO
 function openViewer(r,u){ viewing=r; $('#vimg').src=u; $('#viewer').hidden=false; $('#vDel').textContent='מחק'; }
 function closeViewer(){ $('#viewer').hidden=true; viewing=null; }
 $('#bAlbum').onclick=openAlbum; $('#albClose').onclick=closeAlbum;
+
+// ---------- home ----------
+const esc = t => t.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function renderHome(){
+  const r = RELEASES[0];
+  $('#hVer').textContent = 'v' + APP_VER;
+  $('#verLine').innerHTML = `View&amp;Finder ${APP_VER} · ${r.date} · <b>●</b> Up to date`;
+  $('#newsDot').hidden = S.seenVer === APP_VER;
+  $('#go').textContent = stream ? 'חזרה למצלמה' : 'הפעל מצלמה';
+}
+function showHome(){ closeSheet(); closeQuick(); renderHome(); $('#start').hidden = false; }
+function openNews(){
+  $('#newsBody').innerHTML = RELEASES.map((r,i)=>`<div class="rel"><h3><span class="num">גרסה ${r.v}</span>${i===0?'<span class="badge">עדכון אחרון</span>':''}<span>${r.date}</span></h3>
+    <ul>${r.items.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`).join('');
+  $('#news').hidden = false; S.seenVer = APP_VER; save(); renderHome();
+}
+async function shareApp(){
+  const url = location.origin + location.pathname;
+  const data = {title:'View&Finder', text:'View&Finder · Find your perfect frame\nעינית במאי לטלפון: Sony FX30, FX3, FX5 ו-Super 8, עם קומפוזיציות ופילטרים.', url};
+  try{ if(navigator.share){ await navigator.share(data); return; } }catch(e){ if(e && e.name==='AbortError') return; }
+  try{ await navigator.clipboard.writeText(url); toast('הקישור הועתק. אפשר להדביק ולשלוח'); }
+  catch(e){ prompt('העתק את הקישור:', url); }
+}
+$('#hAlbum').onclick = openAlbum;
+$('#hNews').onclick = openNews; $('#newsClose').onclick = ()=>{ $('#news').hidden = true; };
+$('#hShare').onclick = shareApp;
+$('#hSettings').onclick = async ()=>{ if(!stream) await $('#go').onclick(); if(stream) openSheet(); };
+$('#goHome').onclick = showHome;
+renderHome();
 $('#vClose').onclick=closeViewer;
 $('#vSave').onclick=()=>{ if(viewing) saveToPhone(new File([viewing.blob], viewing.name, {type:'image/jpeg'}), false); };
 $('#vShare').onclick=()=>{ if(viewing && !shareFile(new File([viewing.blob], viewing.name, {type:'image/jpeg'}))) toast('השיתוף לא זמין בדפדפן הזה'); };
@@ -1140,6 +1232,7 @@ if(document.fonts) document.fonts.ready.then(relayout);
 
 $('#go').onclick = async ()=>{
   const err = $('#err'); err.hidden = true;
+  if(stream && stream.getVideoTracks()[0].readyState==='live'){ $('#start').hidden = true; relayout(); return; }
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
     err.textContent = 'הדפדפן לא מאפשר גישה למצלמה כאן. צריך לפתוח את העמוד בכתובת https (למשל דרך GitHub Pages), ב-Safari או Chrome.';
     err.hidden=false; return;
